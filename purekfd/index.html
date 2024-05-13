@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Lrdsnow/PureKFD/4.0/PureKFD/Assets.xcassets/AppIcons/AppIcon.appiconset/App%20Store.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PureWeb</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <a href="#home" class="sidebar-item" data-target="home">
+            <i class="fas fa-home"></i>Home
+        </a>
+        <a href="#browse" class="sidebar-item" data-target="browse">
+            <i class="fas fa-star"></i>  Browse
+        </a>
+        <a href="#search" class="sidebar-item" data-target="search">
+            <i class="fas fa-search"></i>  Search
+        </a>
+    </div>
+
+    <div id="home" class="content-section">
+        <h1>PureWeb</h1>
+        <p>PureKFD for Web</p>
+    </div>
+
+    <div id="browse" class="content-section" style="margin-top: 1600px;">
+        <div id="purekfd-repos">
+            <h2 class="repo-title">PureKFD Repos</h2>
+        </div>
+        <div id="picasso-repos">
+            <h2 class="repo-title">Picasso Repos</h2>
+        </div>
+        <div id="misaka-repos">
+            <h2 class="repo-title">Misaka Repos</h2>
+        </div>
+        <div id="package-detail" style="display: none;"></div>
+    
+        <script>
+            const packageDetail = document.getElementById('package-detail');
+            const jsonUrls = [
+                'https://raw.githubusercontent.com/Lrdsnow/lrdsnows-repo/main/PureKFDv4/purerepo.json',
+                'https://raw.githubusercontent.com/Dreel0akl/poopypoopermaybeworking/master/Essentials/manifest.json',
+                'https://raw.githubusercontent.com/dora727/KaedeFriedDora/master/Essentials/manifest.json',
+                'https://raw.githubusercontent.com/sourcelocation/Picasso-test-repo/main/manifest.json',
+                'https://bomberfish.ca/PicassoRepos/Essentials/manifest.json',
+                'https://raw.githubusercontent.com/circularsprojects/circles-repo/main/manifest.json',
+                'https://raw.githubusercontent.com/hanabiADHD/nbxyRepo/main/repo.json',
+                'https://puck.roeegh.com/repo.json',
+                'https://raw.githubusercontent.com/huligang/coolwcat/main/repo.json',
+                'https://yangjiii.tech/file/Repo/repo.json',
+                'https://raw.githubusercontent.com/leminlimez/leminrepo/main/repo.json',
+                'https://raw.githubusercontent.com/ichitaso/misaka/main/repo.json',
+                'https://raw.githubusercontent.com/chimaha/misakarepo/main/repo.json',
+                'https://raw.githubusercontent.com/sugiuta/repo-mdc/master/repo.json',
+                'https://raw.githubusercontent.com/34306/iPA/main/repo.json',
+                'https://raw.githubusercontent.com/EPOS05/EPOSbox/main/misaka.json',
+                'https://raw.githubusercontent.com/kloytofyexploiter/Misaka-repo_MRX/main/repo.json',
+                'https://raw.githubusercontent.com/HackZy01/misio/main/repo.json',
+                'https://misakarepojson.pages.dev/repo.json',
+                'https://raw.githubusercontent.com/sadending-ios/sadending.github.io/main/Misaka%20Tweaks/Ringtones%20Customer/repo.json',
+                'https://raw.githubusercontent.com/tyler10290/MisakaRepoBackup/main/repo.json',
+                'https://raw.githubusercontent.com/hanabiADHD/DekotasMirror/main/dekotas.json',
+                'https://gist.githubusercontent.com/c22dev/af8dd3a760330eb31da5f8751af1b487/raw/6eb744fabc6eb0eb3352ce41c9a08ce5c38c4e6a/index.json'
+            ];
+            function showRepoDetail(mainURL) {
+                const detailURL = `pkgviewer.html?repourl=${encodeURIComponent(mainURL)}`;
+                window.location.href = detailURL;
+            }
+            function showPackageDetail(mainURL, app) {
+                const pkgid = app.bundleid ?? app.PackageID;
+                const detailURL = `package_detail.html?repourl=${encodeURIComponent(mainURL)}&id=${encodeURIComponent(pkgid)}`;
+                window.location.href = detailURL;
+            }
+            function hidePackageDetail() {
+                packageDetail.style.display = 'none';
+                appList.style.display = 'block';
+            }
+            async function fetchApps() {
+                for (const url of jsonUrls) {
+                    try {
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        const appContainer = document.createElement('div');
+                        appContainer.className = 'app-container';
+                        const appIcon = document.createElement('img');
+                        appIcon.className = 'app-icon';
+                        appIcon.src = data.RepositoryIcon ?? url.substring(0, url.lastIndexOf('/') + 1) + data.icon;
+                        appContainer.appendChild(appIcon);
+                        const appInfo = document.createElement('div');
+                        const appTitle = document.createElement('p');
+                        appTitle.className = 'app-title';
+                        appTitle.textContent = data.name ?? data.RepositoryName;
+                        appInfo.appendChild(appTitle);
+                        const appDescription = document.createElement('p');
+                        appDescription.className = 'app-description';
+                        appDescription.textContent = data.description ?? data.RepositoryDescription;
+                        appInfo.appendChild(appDescription);
+                        appContainer.appendChild(appInfo);
+                        appContainer.addEventListener('click', () => {
+                            showRepoDetail(url);
+                        });
+                        if (Object.keys(data).includes("RepositoryName")) {
+                            const appList = document.getElementById('misaka-repos');
+                            appList.appendChild(appContainer);
+                        } else if (Object.keys(data).includes("repotype")) {
+                            const appList = document.getElementById('purekfd-repos');
+                            appList.appendChild(appContainer);
+                        } else {
+                            const appList = document.getElementById('picasso-repos');
+                            appList.appendChild(appContainer);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching data from ${url}:`, error);
+                    }
+                }
+            }
+            fetchApps();
+        </script>
+    </div>
+
+    <div id="search" class="content-section">
+        <h1>Search Packages</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search packages...">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        <div id="searchResults"></div>
+    </div>   
+    <script src="../script.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

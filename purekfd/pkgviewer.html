@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PureWeb</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .back-button {
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .app-container {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 5px rgba(183, 0, 255, 0.5);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+
+        .app-container:hover {
+            transform: scale(1.02);
+        }
+
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            margin-right: 10px;
+            border-radius: 10px;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .repo-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .app-description {
+            font-size: 14px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with back button -->
+    <div class="header">
+        <a class="back-button" href="javascript:window.history.back();">Back</a>
+    </div>
+
+    <div id="app-list"></div>
+    <div id="package-detail" style="display: none;"></div>
+
+    <script>
+        const appList = document.getElementById('app-list');
+        const packageDetail = document.getElementById('package-detail');
+        var jsonUrls = [];
+        function showPackageDetail(mainURL, app) {
+            const pkgid = app.bundleid ?? app.PackageID;
+            const detailURL = `package_detail.html?repourl=${encodeURIComponent(mainURL)}&id=${encodeURIComponent(pkgid)}`;
+            window.location.href = detailURL;
+        }
+        function hidePackageDetail() {
+            packageDetail.style.display = 'none';
+            appList.style.display = 'block';
+        }
+        async function fetchApps() {
+            for (const url of jsonUrls) {
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const repoName = data.name ?? data.RepositoryName;
+                    const packages = data.packages ?? data.RepositoryContents;
+                    const repoHeader = document.createElement('h2');
+                    repoHeader.textContent = repoName;
+                    repoHeader.className = 'repo-title';
+                    appList.appendChild(repoHeader);
+                    packages.forEach((app) => {
+                        const appContainer = document.createElement('div');
+                        appContainer.className = 'app-container';
+                        const appIcon = document.createElement('img');
+                        appIcon.className = 'app-icon';
+                        appIcon.src = app.Icon ?? url.substring(0, url.lastIndexOf('/') + 1) + app.icon;
+                        appContainer.appendChild(appIcon);
+                        const appInfo = document.createElement('div');
+                        const appTitle = document.createElement('p');
+                        appTitle.className = 'app-title';
+                        appTitle.textContent = app.name ?? app.Name;
+                        appInfo.appendChild(appTitle);
+                        const appDescription = document.createElement('p');
+                        appDescription.className = 'app-description';
+                        appDescription.textContent = app.description ?? app.Description;
+                        appInfo.appendChild(appDescription);
+                        appContainer.appendChild(appInfo);
+                        appContainer.addEventListener('click', () => {
+                            showPackageDetail(url, app);
+                        });
+                        appList.appendChild(appContainer);
+                    });
+                } catch (error) {
+                    console.error(`Error fetching data from ${url}:`, error);
+                }
+            }
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to extract query parameters from the URL
+            function getQueryParameter(name) {
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                try {
+                    const decodedValue = decodeURIComponent(urlSearchParams.get(name));
+                    return decodedValue || ''; // Use an empty string if the decoded value is falsy
+                } catch (error) {
+                    console.error(`Error decoding parameter '${name}':`, error);
+                    return ''; // Return an empty string in case of decoding error
+                }
+            }
+            // Get Repo
+            const repourl = getQueryParameter('repourl');
+            console.log('Repo URL:', repourl);
+            if (repourl) {
+                if (repourl == "all") {
+                    jsonUrls = [
+                        'https://raw.githubusercontent.com/Lrdsnow/lrdsnows-repo/main/PureKFDv4/purerepo.json',
+                        'https://raw.githubusercontent.com/Dreel0akl/poopypoopermaybeworking/master/Essentials/manifest.json',
+                        'https://raw.githubusercontent.com/dora727/KaedeFriedDora/master/Essentials/manifest.json',
+                        'https://raw.githubusercontent.com/sourcelocation/Picasso-test-repo/main/manifest.json',
+                        'https://bomberfish.ca/PicassoRepos/Essentials/manifest.json',
+                        'https://raw.githubusercontent.com/circularsprojects/circles-repo/main/manifest.json',
+                        'https://raw.githubusercontent.com/hanabiADHD/nbxyRepo/main/repo.json',
+                        'https://puck.roeegh.com/repo.json',
+                        'https://raw.githubusercontent.com/huligang/coolwcat/main/repo.json',
+                        'https://yangjiii.tech/file/Repo/repo.json',
+                        'https://raw.githubusercontent.com/leminlimez/leminrepo/main/repo.json',
+                        'https://raw.githubusercontent.com/ichitaso/misaka/main/repo.json',
+                        'https://raw.githubusercontent.com/chimaha/misakarepo/main/repo.json',
+                        'https://raw.githubusercontent.com/sugiuta/repo-mdc/master/repo.json',
+                        'https://raw.githubusercontent.com/34306/iPA/main/repo.json',
+                        'https://raw.githubusercontent.com/EPOS05/EPOSbox/main/misaka.json',
+                        'https://raw.githubusercontent.com/kloytofyexploiter/Misaka-repo_MRX/main/repo.json',
+                        'https://raw.githubusercontent.com/HackZy01/misio/main/repo.json',
+                        'https://misakarepojson.pages.dev/repo.json',
+                        'https://raw.githubusercontent.com/sadending-ios/sadending.github.io/main/Misaka%20Tweaks/Ringtones%20Customer/repo.json',
+                        'https://raw.githubusercontent.com/tyler10290/MisakaRepoBackup/main/repo.json',
+                        'https://raw.githubusercontent.com/hanabiADHD/DekotasMirror/main/dekotas.json',
+                        'https://gist.githubusercontent.com/c22dev/af8dd3a760330eb31da5f8751af1b487/raw/6eb744fabc6eb0eb3352ce41c9a08ce5c38c4e6a/index.json'
+                    ];
+                } else {
+                    jsonUrls = [repourl]
+                }
+            }
+            fetchApps();
+        });
+    </script>
+</body>
+</html>
